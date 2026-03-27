@@ -33,10 +33,10 @@ int main() {
         vc.push_back(punto);
     }
 
-    ofstream archivo("asd - copia (4).csv");
+    ofstream archivo("100x5000.csv");
 
     for (int i = 0; i < vc.size(); i++) {
-        for (int j = i + 1; j < vc.size(); j++) {
+        for (int j = 0; j < vc.size(); j++) {
             float dist = euclidiana(vc[i], vc[j]);
             archivo << dist << "\n";
         }
