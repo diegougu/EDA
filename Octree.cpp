@@ -1,15 +1,16 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <algorithm>
 #include <cmath>
 using namespace std;
 
 struct Point {
-    int x;
-    int y;
-    int z;
+    float x;
+    float y;
+    float z;
     Point() : x(0), y(0), z(0) {}
-    Point(int a, int b, int c) : x(a), y(b), z(c) {}
+    Point(float a, float b, float c) : x(a), y(b), z(c) {}
 
 };
 
@@ -35,13 +36,13 @@ private:
     Point bottomLeft;
     double h;
     int capacity;
-    int nPoints = 0; 
+    int nPoints = 0;
     void split(vector<Point>& points, Octree*& node);
     bool search(const Point& p, Octree*& node);
     void fn(const Point& p, float& radius, Point& pclose, float& mdist);
 
 public:
-    Octree(double _h, int _c, Point bl) : h(_h), capacity(_c), bottomLeft(bl)  {
+    Octree(double _h, int _c, Point bl) : h(_h), capacity(_c), bottomLeft(bl) {
         for (int i = 0; i < 8; i++) {
             children[i] = nullptr;
         }
@@ -49,7 +50,7 @@ public:
     bool exist(const Point& p);
     void insert(const Point& p);
     Point find_closest(const Point& p, int radius);
-    void print(int depth = 0);
+    void print(int depth);
 };
 
 bool Octree::search(const Point& p, Octree*& node) {
@@ -133,7 +134,7 @@ void Octree::split(vector<Point>& points, Octree*& node) {
     }
 
     vector<Point> old = node->points;
-    node->points.clear();   
+    node->points.clear();
     node->nPoints = 0;
     for (auto& pt : old) {
         insert(pt);
@@ -207,20 +208,31 @@ bool Octree::exist(const Point& p) {
     return false;
 }
 
+vector<Point> loadXYZ(const string& filename) {
+    vector<Point> pts;
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "No se pudo abrir: " << filename << endl;
+        return pts;
+    }
+    float x, y, z;
+    while (file >> x >> y >> z) {
+        pts.push_back(Point(x, y, z));
+    }
+    cout << "Puntos cargados: " << pts.size() << endl;
+    return pts;
+}
+
 int main() {
-    Octree tree(8.0, 2, Point(0, 0, 0));
+    Octree tree(100.0, 1000, Point(-50.0f, -50.0f, -50.0f));
 
-    tree.insert(Point(1, 1, 1));
-    tree.insert(Point(6, 6, 6));
-    tree.insert(Point(2, 2, 2)); 
-    tree.insert(Point(5, 5, 5));
-    tree.insert(Point(1, 2, 1));
-
-    cout << "=== Arbol ===" << endl;
+    vector<Point> pts = loadXYZ("aguila.xyz");
+    for (auto& p : pts) {
+        tree.insert(p);
+    }
     tree.print(0);
 
-
-    Point A(1, 1, 1);
+    Point A(1.0f, 1.0f, 1.0f);
     Point res = tree.find_closest(A, 25);
     cout << "Mas cercano a (1,1,1) con radio 25: ";
     cout << "(" << res.x << "," << res.y << "," << res.z << ")" << endl;
